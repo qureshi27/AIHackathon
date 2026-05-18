@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import * as ort from 'onnxruntime-web';
+import * as ort from 'onnxruntime-web/wasm';
 import { useHandLandmarker } from '../hooks/useHandLandmarker';
 import { useOnnxModel } from '../hooks/useOnnxModel';
 import { normalizeLandmarks, softmax, argmax } from '../lib/preprocessing';
@@ -20,8 +20,8 @@ export function LiveDemo() {
   const lastInferRef = useRef(0);
   const fpsRef = useRef({ frames: 0, since: performance.now(), value: 0 });
 
-  const { ready: hlReady, error: hlError, landmarker } = useHandLandmarker();
-  const { ready: ortReady, error: ortError, session, inputName } = useOnnxModel(MODEL_URL);
+  const { ready: hlReady, error: hlError, progress: hlProgress, landmarker } = useHandLandmarker();
+  const { ready: ortReady, error: ortError, progress: ortProgress, session, inputName } = useOnnxModel(MODEL_URL);
 
   const [status, setStatus] = useState<Status>('idle');
   const [permissionError, setPermissionError] = useState<string | null>(null);
@@ -188,12 +188,7 @@ export function LiveDemo() {
                   )}
                   {(status === 'idle' || status === 'loading') && (
                     <div className="demo-msg">
-                      {modelsLoading ? (
-                        <>
-                          <div className="demo-spinner" aria-hidden />
-                          <span>Loading models…</span>
-                        </>
-                      ) : errorMsg ? (
+                      {errorMsg && !modelsLoading ? (
                         <div className="demo-msg-error">
                           <strong>Model load failed.</strong>
                           <span>{errorMsg}</span>
@@ -203,9 +198,29 @@ export function LiveDemo() {
                           </span>
                         </div>
                       ) : (
-                        <button className="btn btn-primary demo-start" onClick={start}>
-                          Start camera
-                        </button>
+                        <>
+                          <button className="btn btn-primary demo-start" onClick={start}>
+                            {modelsLoading ? 'Start camera (models still loading)' : 'Start camera'}
+                          </button>
+                          {modelsLoading && (
+                            <div className="demo-progress">
+                              <div className="demo-progress-row">
+                                <span className="text-mono">Recognition model</span>
+                                <span className="text-mono">{Math.round(ortProgress * 100)}%</span>
+                              </div>
+                              <div className="demo-progress-bar">
+                                <span style={{ width: `${ortProgress * 100}%` }} />
+                              </div>
+                              <div className="demo-progress-row">
+                                <span className="text-mono">Hand detector</span>
+                                <span className="text-mono">{Math.round(hlProgress * 100)}%</span>
+                              </div>
+                              <div className="demo-progress-bar">
+                                <span style={{ width: `${hlProgress * 100}%` }} />
+                              </div>
+                            </div>
+                          )}
+                        </>
                       )}
                     </div>
                   )}
