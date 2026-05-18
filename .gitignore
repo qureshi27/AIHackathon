@@ -1,0 +1,57 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.venv/
+venv/
+env/
+.ipynb_checkpoints/
+
+# --- Node ---
+node_modules/
+dist/
+dist-ssr/
+.vite/
+*.local
+
+# --- TypeScript build artifacts ---
+*.tsbuildinfo
+Code/web/vite.config.js
+Code/web/vite.config.d.ts
+
+# --- Editors / OS ---
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# --- Vercel ---
+.vercel
+
+# --- Environment ---
+.env
+.env.local
+.env.*.local
+
+# --- Large model artifacts (regenerate from notebooks or .pt.zip) ---
+# Extracted .pt directories from torch.save's zip format
+Code/best_effnet_v2s.pt/
+Code/best_landmark_transformer_v2.pt/
+Code/mediapipe_landmarks_cache_v2.npz/
+
+# EfficientNetV2-S checkpoint is 82 MB — close to GitHub's 100 MB limit and
+# the web demo doesn't need it. Keep locally, regenerate via notebooks/01.
+Code/best_effnet_v2s.pt.zip
+
+# --- Training data (downloaded via scripts/download_data.py) ---
+data/
+*.kaggle.json
+
+# --- Build/test artifacts ---
+*.log
+coverage/
+.pytest_cache/
+.mypy_cache/

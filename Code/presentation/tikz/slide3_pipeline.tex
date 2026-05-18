@@ -1,0 +1,133 @@
+\documentclass[border=8pt,tikz]{standalone}
+\usepackage{tikz}
+\usepackage{amsmath}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usetikzlibrary{arrows.meta,positioning,calc,shapes.geometric,decorations.pathreplacing,backgrounds,fit}
+
+\definecolor{bg}{HTML}{0A0A0A}
+\definecolor{maroon}{HTML}{800020}
+\definecolor{maroonLight}{HTML}{B03050}
+\definecolor{accent}{HTML}{E8C547}
+\definecolor{text}{HTML}{F5F5F5}
+\definecolor{muted}{HTML}{A0A0A0}
+\definecolor{cardbg}{HTML}{1A1A1A}
+
+\begin{document}
+\begin{tikzpicture}[
+    font=\sffamily,
+    every node/.style={text=text},
+    stage/.style={
+        rectangle, rounded corners=6pt,
+        draw=maroonLight, line width=1.2pt,
+        fill=cardbg,
+        minimum width=3.6cm, minimum height=2.4cm,
+        align=center,
+        inner sep=8pt,
+    },
+    stagetitle/.style={font=\sffamily\bfseries\large, text=accent},
+    stagesub/.style={font=\sffamily\footnotesize, text=muted, align=center},
+    arrow/.style={-{Stealth[length=4mm,width=3mm]}, line width=1.4pt, draw=accent},
+    sectionlabel/.style={font=\sffamily\bfseries\small, text=maroonLight},
+    divider/.style={dashed, draw=muted!60, line width=0.8pt},
+]
+
+% Background
+\fill[bg] (-1,-5.2) rectangle (24,5.5);
+
+% =============================================================
+%  TOP ROW: STAGES
+% =============================================================
+\node[stage] (cam) at (0,1.5) {
+    \stagetitle{Capture} \\[6pt]
+    \stagesub{\textbf{640$\times$480} @ \textbf{30 fps}\\getUserMedia()\\mirrored frame}
+};
+
+\node[stage, right=1.4cm of cam] (mp) {
+    \stagetitle{Detect} \\[6pt]
+    \stagesub{\textbf{MediaPipe} Hands\\WASM, on-device\\\textbf{21} keypoints (x,y,z)}
+};
+
+\node[stage, right=1.4cm of mp] (norm) {
+    \stagetitle{Normalize} \\[6pt]
+    \stagesub{wrist-center\\max-distance scale\\StandardScaler\\$\rightarrow$ \textbf{63-d} vector}
+};
+
+\node[stage, right=1.4cm of norm] (model) {
+    \stagetitle{Classify} \\[6pt]
+    \stagesub{\textbf{Landmark Transformer}\\6 encoder layers\\\textbf{11.3 MB} ONNX}
+};
+
+\node[stage, right=1.4cm of model] (smooth) {
+    \stagetitle{Commit} \\[6pt]
+    \stagesub{8-frame vote\\\textbf{800 ms} hold\\$\rightarrow$ letter, space, del}
+};
+
+% Arrows between stages
+\draw[arrow] (cam) -- (mp);
+\draw[arrow] (mp) -- (norm);
+\draw[arrow] (norm) -- (model);
+\draw[arrow] (model) -- (smooth);
+
+% =============================================================
+%  Stage labels above
+% =============================================================
+\node[sectionlabel, above=4pt of cam]   {01};
+\node[sectionlabel, above=4pt of mp]    {02};
+\node[sectionlabel, above=4pt of norm]  {03};
+\node[sectionlabel, above=4pt of model] {04};
+\node[sectionlabel, above=4pt of smooth]{05};
+
+% =============================================================
+%  Dotted divider between PIPELINE and DATA-SHAPE row
+% =============================================================
+\draw[divider] (-0.8,-0.6) -- (23.5,-0.6);
+
+\node[sectionlabel, anchor=west] at (-0.8,-1.0) {Data shape};
+
+% =============================================================
+%  BOTTOM ROW: DATA REPRESENTATION AT EACH STAGE
+% =============================================================
+\node[font=\sffamily\footnotesize\ttfamily, text=text, align=center] (d1) at (cam.south |- 0,-2.6)
+    {Tensor\\(3, 480, 640)\\\textcolor{muted}{RGB pixels}};
+
+\node[font=\sffamily\footnotesize\ttfamily, text=text, align=center] (d2) at (mp.south |- 0,-2.6)
+    {Tensor\\(21, 3)\\\textcolor{muted}{normalized coords}};
+
+\node[font=\sffamily\footnotesize\ttfamily, text=text, align=center] (d3) at (norm.south |- 0,-2.6)
+    {Float32\\(1, 63)\\\textcolor{muted}{scaled features}};
+
+\node[font=\sffamily\footnotesize\ttfamily, text=text, align=center] (d4) at (model.south |- 0,-2.6)
+    {Float32\\(1, 29)\\\textcolor{muted}{class logits}};
+
+\node[font=\sffamily\footnotesize\ttfamily, text=text, align=center] (d5) at (smooth.south |- 0,-2.6)
+    {String\\"H","E","L"...\\\textcolor{muted}{committed letter}};
+
+% Connecting drop-down lines from each stage to its data label
+\foreach \a/\b in {cam/d1, mp/d2, norm/d3, model/d4, smooth/d5} {
+    \draw[dotted, draw=muted, line width=0.8pt] (\a.south) -- (\b.north);
+}
+
+% =============================================================
+%  Dotted divider between DATA SHAPE and TIMING row
+% =============================================================
+\draw[divider] (-0.8,-3.5) -- (23.5,-3.5);
+
+\node[sectionlabel, anchor=west] at (-0.8,-3.9) {Per-frame budget};
+
+\node[font=\sffamily\footnotesize, text=accent, align=center] at (cam.south    |- 0,-4.4) {$\sim$2 ms};
+\node[font=\sffamily\footnotesize, text=accent, align=center] at (mp.south     |- 0,-4.4) {$\sim$7 ms};
+\node[font=\sffamily\footnotesize, text=accent, align=center] at (norm.south   |- 0,-4.4) {$<$1 ms};
+\node[font=\sffamily\footnotesize, text=accent, align=center] at (model.south  |- 0,-4.4) {$\sim$15 ms};
+\node[font=\sffamily\footnotesize, text=accent, align=center] at (smooth.south |- 0,-4.4) {$<$1 ms};
+
+\node[font=\sffamily\bfseries\small, text=text, anchor=east] at (23.5,-4.4) {Total $\approx$ 25 ms / frame};
+
+% =============================================================
+%  Privacy badge (top-right)
+% =============================================================
+\node[draw=accent, line width=1pt, rounded corners=4pt, font=\sffamily\footnotesize\bfseries,
+      text=accent, inner sep=4pt] at (21.5,4.5) {100\% on-device $\cdot$ zero uploads};
+
+\end{tikzpicture}
+\end{document}

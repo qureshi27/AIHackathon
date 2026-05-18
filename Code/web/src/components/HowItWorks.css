@@ -1,0 +1,39 @@
+.how-head { max-width: 720px; margin-bottom: 56px; }
+.how-sub { font-size: 17px; margin-top: 16px; line-height: 1.55; }
+
+.how-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.how-card {
+  padding: 28px;
+  position: relative;
+  transition: transform var(--dur-base) var(--ease-default), border-color var(--dur-base) var(--ease-default);
+  animation: fade-up var(--dur-slow) var(--ease-default) both;
+}
+.how-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--border-strong);
+}
+
+.how-num {
+  font-size: 14px;
+  color: var(--field-border);
+  letter-spacing: 0.1em;
+  margin-bottom: 24px;
+}
+
+.how-title {
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: 10px;
+  letter-spacing: -0.01em;
+}
+
+.how-body { font-size: 15px; line-height: 1.6; }
+
+@media (max-width: 800px) {
+  .how-grid { grid-template-columns: 1fr; }
+}
