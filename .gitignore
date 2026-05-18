@@ -1,12 +1,12 @@
-# --- Python ---
-__pycache__/
-*.py[cod]
-*$py.class
-*.egg-info/
-.venv/
-venv/
-env/
-.ipynb_checkpoints/
+# This repo only tracks Code/web/ — the Vercel-deployable web app.
+# Everything else stays on local disk but is ignored by git.
+
+# --- Ignore everything outside Code/web/ ---
+/*
+!/.gitignore
+!/Code/
+/Code/*
+!/Code/web/
 
 # --- Node ---
 node_modules/
@@ -35,23 +35,3 @@ Thumbs.db
 .env
 .env.local
 .env.*.local
-
-# --- Large model artifacts (regenerate from notebooks or .pt.zip) ---
-# Extracted .pt directories from torch.save's zip format
-Code/best_effnet_v2s.pt/
-Code/best_landmark_transformer_v2.pt/
-Code/mediapipe_landmarks_cache_v2.npz/
-
-# EfficientNetV2-S checkpoint is 82 MB — close to GitHub's 100 MB limit and
-# the web demo doesn't need it. Keep locally, regenerate via notebooks/01.
-Code/best_effnet_v2s.pt.zip
-
-# --- Training data (downloaded via scripts/download_data.py) ---
-data/
-*.kaggle.json
-
-# --- Build/test artifacts ---
-*.log
-coverage/
-.pytest_cache/
-.mypy_cache/
