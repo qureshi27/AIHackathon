@@ -1,0 +1,21 @@
+{
+  "name": "ASL Live",
+  "short_name": "ASL Live",
+  "description": "Real-time American Sign Language alphabet recognition. Runs on-device in your browser.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "categories": ["education", "utilities", "accessibility"],
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "permissions": ["camera"]
+}

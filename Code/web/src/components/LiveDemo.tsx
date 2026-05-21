@@ -41,8 +41,10 @@ export function LiveDemo() {
 
     if (!navigator.mediaDevices?.getUserMedia) {
       setPermissionError(
-        'This browser does not expose a camera API. On a mobile app wrapper (Capacitor / WebView), ' +
-        'grant camera permission in your app config and ensure the WebView allows getUserMedia.',
+        'The WebView this app runs in is not exposing the camera API. ' +
+        'If you wrapped the site with webintoapp.com or a similar service: in the builder, ' +
+        'enable the CAMERA permission, then rebuild and reinstall the APK. ' +
+        'On the device, also check Settings → Apps → ASL Live → Permissions → Camera.',
       );
       setStatus('error');
       return;

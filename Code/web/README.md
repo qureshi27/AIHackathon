@@ -115,7 +115,49 @@ the training-time inference rule from the Python notebook).
 
 ---
 
-## 6 · Wrapping as a mobile app (Capacitor)
+## 6a · Wrapping as a mobile app (webintoapp.com)
+
+If you use [webintoapp.com](https://webintoapp.com) to wrap your Vercel URL as
+an Android APK / iOS IPA, the camera will silently do nothing unless you tick
+a few specific boxes. The web app already does its part — opts in via the
+`Permissions-Policy: camera=(self)` header, `manifest.webmanifest` declares the
+`camera` permission, and `<meta http-equiv="Permissions-Policy">` is present
+for WebViews that read meta over HTTP headers.
+
+You still need to do this on **webintoapp.com's side**:
+
+1. **Permissions tab** in the builder — tick **Camera**. (Also tick
+   *Internet* if it isn't on by default.)
+2. **WebView settings** — make sure *"Allow access to camera"* /
+   *"Allow `getUserMedia`"* is on. Some plans hide this under "Advanced".
+3. **HTTPS only** — paste the Vercel `https://...vercel.app` URL, not a
+   custom domain that hasn't propagated yet. Mixed-content kills camera.
+4. **Rebuild + reinstall the APK** after toggling any permission. The
+   permission set is baked into the AndroidManifest at build time —
+   reloading the in-app page won't help.
+5. **First-launch grant** — on first use of the camera, Android will show
+   the standard "Allow ASL Live to take pictures and record video?" prompt.
+   If the user picks *Deny*, the in-app error directs them to
+   *Settings → Apps → ASL Live → Permissions → Camera*.
+
+### Why we can't grant camera permission automatically
+
+No web app can. Camera is an OS-level permission gated on a user gesture and
+a clear consent dialog. The most a page can do is:
+
+- Declare the permission in PWA manifest + `Permissions-Policy` (done).
+- Fire `getUserMedia` only after the user taps "Start camera" (done — see
+  [`LiveDemo.tsx`](src/components/LiveDemo.tsx)).
+- Cycle through fallback constraints if the first one fails (done —
+  desktop ideal → `facingMode: 'user'` → `facingMode: 'environment'` →
+  `video: true`).
+- Show specific recovery advice per error name (done — `NotAllowedError`,
+  `NotFoundError`, `NotReadableError`, etc.).
+
+Anything beyond that (silently turning on the camera, bypassing the OS
+prompt) is blocked by every modern mobile browser and WebView by design.
+
+## 6b · Wrapping as a mobile app (Capacitor)
 
 The web app works in a phone's browser already, but if you're packaging it as
 a native iOS/Android app using **Capacitor**, the WebView won't grant camera
