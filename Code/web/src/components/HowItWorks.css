@@ -34,6 +34,19 @@
 
 .how-body { font-size: 15px; line-height: 1.6; }
 
+@media (max-width: 1024px) {
+  .how-grid { grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .how-card { padding: 22px; }
+  .how-title { font-size: 20px; }
+}
+
 @media (max-width: 800px) {
   .how-grid { grid-template-columns: 1fr; }
+  .how-head { margin-bottom: 32px; }
+}
+
+@media (max-width: 480px) {
+  .how-card { padding: 20px; }
+  .how-title { font-size: 19px; }
+  .how-body { font-size: 14px; }
 }

@@ -70,6 +70,19 @@
   border: 1px solid var(--border-subtle);
 }
 
+@media (max-width: 960px) {
+  .model-card { padding: 24px; }
+  .model-title { font-size: 24px; }
+}
+
 @media (max-width: 800px) {
   .model-grid { grid-template-columns: 1fr; }
+  .model-head { margin-bottom: 32px; }
+}
+
+@media (max-width: 480px) {
+  .model-card { padding: 22px; }
+  .model-title { font-size: 22px; }
+  .model-role { font-size: 14px; margin-bottom: 18px; }
+  .model-metrics li { font-size: 11px; padding: 5px 10px; }
 }

@@ -37,16 +37,50 @@ export function LiveDemo() {
   async function start() {
     if (status === 'live' || status === 'requesting') return;
     setStatus('requesting');
+    setPermissionError(null);
+
+    if (!navigator.mediaDevices?.getUserMedia) {
+      setPermissionError(
+        'This browser does not expose a camera API. On a mobile app wrapper (Capacitor / WebView), ' +
+        'grant camera permission in your app config and ensure the WebView allows getUserMedia.',
+      );
+      setStatus('error');
+      return;
+    }
+
+    const attempts: MediaStreamConstraints[] = [
+      { video: { facingMode: { ideal: 'user' }, width: { ideal: 640 }, height: { ideal: 480 } }, audio: false },
+      { video: { facingMode: 'user' }, audio: false },
+      { video: { facingMode: 'environment' }, audio: false },
+      { video: true, audio: false },
+    ];
+
+    let stream: MediaStream | null = null;
+    let lastError: Error | null = null;
+    for (const constraints of attempts) {
+      try {
+        stream = await navigator.mediaDevices.getUserMedia(constraints);
+        break;
+      } catch (e) {
+        lastError = e instanceof Error ? e : new Error(String(e));
+        if (lastError.name === 'NotAllowedError' || lastError.name === 'SecurityError') break;
+      }
+    }
+
+    if (!stream) {
+      setPermissionError(friendlyCameraError(lastError));
+      setStatus('error');
+      return;
+    }
+
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: 'user' },
-        audio: false,
-      });
       const v = videoRef.current!;
       v.srcObject = stream;
+      v.setAttribute('playsinline', 'true');
       await v.play();
       setStatus('live');
     } catch (e) {
+      stream.getTracks().forEach(t => t.stop());
       setPermissionError(e instanceof Error ? e.message : String(e));
       setStatus('error');
     }
@@ -174,7 +208,14 @@ export function LiveDemo() {
         <div className="demo-grid">
           <div className="card demo-stage">
             <div className="demo-viewport">
-              <video ref={videoRef} playsInline muted className="demo-video" />
+              <video
+                ref={videoRef}
+                className="demo-video"
+                playsInline
+                muted
+                autoPlay
+                disablePictureInPicture
+              />
               <canvas ref={canvasRef} className="demo-canvas" />
               {status !== 'live' && (
                 <div className="demo-overlay">
@@ -272,6 +313,25 @@ export function LiveDemo() {
       </div>
     </section>
   );
+}
+
+function friendlyCameraError(err: Error | null): string {
+  if (!err) return 'Could not open the camera. No additional info from the browser.';
+  switch (err.name) {
+    case 'NotAllowedError':
+    case 'SecurityError':
+      return 'Camera permission was denied. Allow camera access in your browser/device settings, then reload this page.';
+    case 'NotFoundError':
+    case 'OverconstrainedError':
+      return 'No usable camera was found on this device.';
+    case 'NotReadableError':
+    case 'TrackStartError':
+      return 'The camera is locked by another app or tab. Close it and try again.';
+    case 'TypeError':
+      return 'Camera access requires a secure context (HTTPS or localhost). Reload over https:// and retry.';
+    default:
+      return err.message || `Camera error: ${err.name}`;
+  }
 }
 
 function drawSkeleton(

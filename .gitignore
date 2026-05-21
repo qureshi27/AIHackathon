@@ -8,6 +8,10 @@
 /Code/*
 !/Code/web/
 
+# Python conversion script lives next to the web app for convenience but
+# isn't part of the Vercel build.
+/Code/web/scripts/
+
 # --- Node ---
 node_modules/
 dist/

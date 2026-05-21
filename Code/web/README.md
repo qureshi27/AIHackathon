@@ -115,7 +115,55 @@ the training-time inference rule from the Python notebook).
 
 ---
 
-## 6 · Troubleshooting
+## 6 · Wrapping as a mobile app (Capacitor)
+
+The web app works in a phone's browser already, but if you're packaging it as
+a native iOS/Android app using **Capacitor**, the WebView won't grant camera
+access without explicit configuration. The browser symptom is "camera blocked"
+on mobile but everything works in desktop Chrome.
+
+### iOS
+
+1. `npx cap add ios`
+2. Open `ios/App/App/Info.plist` and add:
+   ```xml
+   <key>NSCameraUsageDescription</key>
+   <string>This app needs camera access to recognise sign language gestures.</string>
+   ```
+3. In `capacitor.config.ts`, the default Capacitor WebView (`WKWebView`) supports
+   `getUserMedia` from iOS 14.3+. No extra plugin required for basic camera
+   streaming.
+
+### Android
+
+1. `npx cap add android`
+2. In `android/app/src/main/AndroidManifest.xml` add inside `<manifest>`:
+   ```xml
+   <uses-permission android:name="android.permission.CAMERA" />
+   <uses-feature android:name="android.hardware.camera" android:required="false" />
+   ```
+3. In the `<application>` tag, ensure the WebView allows mixed content if
+   you're loading the model from a remote URL (we serve from `public/`, so
+   this is usually fine):
+   ```xml
+   android:usesCleartextTraffic="true"
+   ```
+4. Android WebView requires you to grant the permission at runtime. In
+   `android/app/src/main/java/.../MainActivity.java` extend
+   `BridgeActivity` and override `onPermissionResult` if needed — Capacitor's
+   default flow is sufficient for most cases.
+
+### TL;DR
+
+If you see "camera blocked" inside the mobile app, the WebView did not get
+permission. Re-check:
+
+- The Info.plist / AndroidManifest entries above.
+- The OS-level permission for your app (Settings → Privacy → Camera).
+- That the app was reinstalled after adding permissions (manifest changes
+  don't propagate via hot reload).
+
+## 7 · Troubleshooting
 
 **"Model load failed: 404"** — `public/landmark_model.onnx` is missing. Run step 2 to regenerate it.
 

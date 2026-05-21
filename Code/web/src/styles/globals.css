@@ -12,6 +12,9 @@ body {
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   overflow-x: hidden;
+  overscroll-behavior: none;
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
 }
 
 a { color: var(--accent-primary); text-decoration: none; }
@@ -40,6 +43,18 @@ h1, h2, h3, h4, p { margin: 0; }
 .section {
   padding: 96px 0;
   position: relative;
+}
+
+@media (max-width: 960px) {
+  .section { padding: 72px 0; }
+}
+@media (max-width: 720px) {
+  .container { padding: 0 18px; }
+  .section { padding: 56px 0; }
+}
+@media (max-width: 480px) {
+  .container { padding: 0 16px; }
+  .section { padding: 44px 0; }
 }
 
 .eyebrow {
@@ -85,6 +100,8 @@ h1, h2, h3, h4, p { margin: 0; }
   font-weight: 600;
   font-size: 15px;
   letter-spacing: -0.01em;
+  min-height: 44px;
+  touch-action: manipulation;
   transition: transform var(--dur-fast) var(--ease-default), background var(--dur-fast) var(--ease-default), box-shadow var(--dur-base) var(--ease-default);
 }
 

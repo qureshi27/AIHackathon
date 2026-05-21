@@ -7,6 +7,20 @@
   gap: 12px;
 }
 
+@media (max-width: 720px) {
+  .alphabet-head { margin-bottom: 32px; }
+  .alphabet-grid { grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); gap: 8px; }
+  .alphabet-cell { padding: 14px 8px; }
+  .alphabet-glyph { font-size: 26px; }
+  .alphabet-name { font-size: 10px; }
+}
+
+@media (max-width: 480px) {
+  .alphabet-grid { grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); }
+  .alphabet-cell { padding: 12px 6px; gap: 6px; }
+  .alphabet-glyph { font-size: 22px; }
+}
+
 .alphabet-cell {
   background: var(--bg-surface);
   border: 1px solid var(--border-subtle);
